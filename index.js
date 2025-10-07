@@ -1,4 +1,17 @@
 
+
+function removeActiveClass(){
+  const activeButton = document.getElementsByClassName("active");
+
+  for(let btn of activeButton){
+    btn.classList.remove("active");
+  }
+  // console.log(activeButton);
+}
+
+
+
+
 function loadCategories() {
     fetch("https://openapi.programming-hero.com/api/phero-tube/categories")
         .then((res) => res.json())
@@ -6,24 +19,6 @@ function loadCategories() {
 }
 
 
-
-
-function loadVideos(){
-    fetch("https://openapi.programming-hero.com/api/phero-tube/videos")
-    .then((response)=>response.json())
-    .then((data)=> displayVideos(data.videos));
-}
-
-
-const loadCategoriesVideos=(id)=>{
-    console.log(id)
-    const url=`https://openapi.programming-hero.com/api/phero-tube/category/${id}
-    `;
-    console.log(url);
-    fetch(url)
-    .then((res)=>res.json())
-    .then((data)=>displayVideos(data.category));
-}
 
 function displayCategories(categories) {
 
@@ -36,7 +31,7 @@ function displayCategories(categories) {
 
 
         categoryDiv.innerHTML = `
-         <button onclick="loadCategoriesVideos(${cat.category_id})"    class="btn btn-sm hover:bg-red-600 hover:text-white">${cat.category}</button>
+         <button id="btn-${cat.category_id}" onclick="loadCategoriesVideos(${cat.category_id})"    class="btn btn-sm hover:bg-red-600 hover:text-white">${cat.category}</button>
         `;
 
 
@@ -46,11 +41,52 @@ function displayCategories(categories) {
 }
 
 
+function loadVideos(){
+    fetch("https://openapi.programming-hero.com/api/phero-tube/videos")
+    .then((response)=>response.json())
+    .then((data)=> {
+       removeActiveClass();
+      document.getElementById("btn-all").classList.add("active");
+      displayVideos(data.videos);
+    });
+}
+
+
+const loadCategoriesVideos=(id)=>{
+    console.log(id)
+    const url=`https://openapi.programming-hero.com/api/phero-tube/category/${id}
+    `;
+    console.log(url);
+    fetch(url)
+    .then((res)=>res.json())
+    .then((data)=>{
+      removeActiveClass()
+      const clickedButton= document.getElementById(`btn-${id}`);
+      clickedButton.classList.add("active");
+     
+      displayVideos(data.category)
+    });
+}
+
+
+
+
 const displayVideos=(Videos)=>{
 
 const videoContainer= document.getElementById("video-container");
 
 videoContainer.innerHTML= "";
+
+if(Videos.length==0){
+  videoContainer.innerHTML=`
+   <div class="col-span-full flex flex-col text-center justify-center items-center py-20">
+            <img class="w-[120px]" src="./asset/Icon.png" alt="">
+            <h2 class="text-2xl font-bold">Opps sorry there is no content here</h2>
+        </div>
+  `
+  
+  return;
+}
 
 Videos.forEach((video)=>{
     console.log(video);
@@ -83,6 +119,7 @@ Videos.forEach((video)=>{
     
    
   </div>
+  <button onclick="loadVideoDetails" class="btn btn-block">Show Details</button>
 </div>
      `
      videoContainer.append(videoCard)
